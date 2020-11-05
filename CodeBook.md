@@ -5,50 +5,64 @@ date: "11/5/2020"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
-## R Markdown
+## Code book for CleanData Project analysis
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+### Prerequisites and the result
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+**Input:** 
+input data is obtained from 
+<https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip>
+The zip archive must be unpacked to the working directorty along with the run_analysis.R script
+THe detailed data ser description is available 
+<http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones>
 
-```{r cars}
-summary(cars)
-```
+**Output:** 
+run_analysis.R script provides the visual output as a dwo-dimensional
+table in spreadsheet-style data viewer
 
+**R-packages:**
+the packages `dplyr` and `janitor` are required to run this script
 
-## Including Plots
+### Data manipulation steps
 
-You can also embed plots, for example:
+1. Reading into R and merging data sets
+**Goal:**  To combine multiple data sets within initial data
+..1.1 Read all data sets to separate data frame objects with `read.table`
+..1.2 using `cbind()`combine three data frames within *training* and *test* folders respectively to get only one data frame per folder
+..1.3 using `rbind()` bind two data frames (output from 1.2) into a single data frame
+**Output:** a single data frame containing all observations     
+      
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+2.Assigning column names
+**Goal:** To give data set the descriptive variable names for each column.
+..2.1 Extract column names into vector from file "features".txt". 
+....2.1.1 Additionally append two labels to the left "subject"" and "activity"
+..2.2 Assign the output vector from 2.1.1 as column names to data frame with a`colnames()` method
+..2.3 To ensure clean names use `janitor` package `clean_names()` method.
+**Output:** Same as step 1 with descriptive column names
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+3. Subsetting data set
+**Goal: ** To extract only the measurements on the *mean* and *standard deviation* for each measurement 
+..3.1 Using regex match wit `grep` extract following columns by name:
+....- subject 
+....- activity
+....- all columns that match "-mean()" in column names
+....- all columns that match "-std()" in column names
+**Output:** subset of initial data set containing only columns macthing the conditions in 3.1
 
+4. Using `dplyr` package convert output from previous step to tbl class for further analysis  
+**Output:** tbl class object 
 
-1st step. Merging data sets to create one dataset
-1. Combine three datasets within training and test folders to get only 1 dataset per folder
-    read files into variables with read.table
-    cbind data frames into one data frame
-2. Combine train and test datasets into one with rbind
+5. Replace the activity indices with descriptive names
+**Goal:** provide clear meaning to the observation values 
+..5.1 Load a lookup table from file "activity_labels".txt
+...5.2 mutate the output table from 4.to replace activity numerical values with respective character string from the lookup table 5.1.
 
-3.To give dataset the descriptive vatiable names extract column names into vector from file features.txt. 
-Additionally append two labels to the left "subject"" and "activity"
-    assign this vector as column names to data frame
-    to ensure clean names use janitor library method clean_names() method.
-  
-  4. To  Extract only the measurements on the mean and standard deviation for 
-   each measurement I am using regex match wit grep. ubset includes:
-   columns Subject and activity and all columns that match either "-mean()" or "-std()" literals in their column names
+6. From the step 5 output, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+**Goal:** provide the aggregated table with the results of the analysis.
+..6.1 using `dplyr` package group the input data table by activity and then by subject
+..6.2 summarize all numeric columns with function mean, disregarding all NA values
+..6.3 store the output into the variable "result"
 
-
-3. using dplyr package Converts output from previous step to tbl class  
-
-4. to replace the activity indices with descriptive names load a lookup table from "activity_labels".txt
-    mutate the table to replace activity names with respective character string from the lookup table.
-
+7. Output result to screen using `View()`

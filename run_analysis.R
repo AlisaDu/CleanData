@@ -24,7 +24,9 @@ test <- cbind(test.subject, test.y, test.x )
 df <- rbind(train, test)
 
 
-# load column names from a lookup file features.txt and assign to df
+# 4. Appropriately label the data set with descriptive variable names.
+# load variable names from a lookup file features.txt 
+# and assign as column names to df
 features  <- read.table("./UCI HAR Dataset/features.txt",header = FALSE)
 
 colnames <- unlist(c("subject", 
@@ -33,7 +35,8 @@ colnames <- unlist(c("subject",
                     ))
 
 colnames(df) <- colnames
-#clean names using janitor library method clean_names
+
+# clean column names using a method from janitor library
 clean_names(df)
 
 #  2. Extract only the measurements on the mean and standard deviation for 
@@ -45,23 +48,23 @@ dataset <- df[,c(1,
                 )
               ]
 
-
 # convert to tbl class
  dt <- tbl_df(dataset)
 
 
 # 3. Use descriptive activity names to name the activities in the data set
- activities <- read.table("./UCI HAR Dataset/activity_labels.txt",
+activities <- read.table("./UCI HAR Dataset/activity_labels.txt",
                           header = FALSE)
  
+# replace indices with descriptive names
 dt<- mutate(dt, activity = activities[activity,2])
  
-# 4. Appropriately labels the data set with descriptive variable names.
-
-
 
 # 5. From the data set in step 4, creates a second, independent tidy data set 
 #    with the average of each variable for each activity and each subject.
 
-result <- dt %>% group_by(activity, subject) %>% summarize_if(is.numeric,mean, na.rm = TRUE)
+result <- dt %>% 
+    group_by(activity, subject) %>% 
+    summarize_if(is.numeric,mean, na.rm = TRUE)
+
 View(result)
